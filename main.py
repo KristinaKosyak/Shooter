@@ -1,5 +1,5 @@
 import pygame
-from random import uniform, randint
+from random import uniform, randint, choice
 
 from pygame.examples.moveit import WIDTH, HEIGHT
 
@@ -11,7 +11,7 @@ running = True
 dt = 0
 background = pygame.image.load("ref/cosmos.png")
 player_image = pygame.image.load("ref/rocket1488.png")
-enemy_image = pygame.image.load("ref/enemy.png")
+enemy_image = [pygame.image.load(f"ref/enemy_{i}.png") for i in range(1, 4)]
 bullet = pygame.Surface((5, 10))
 bullet.fill((255, 0, 0))
 
@@ -26,8 +26,10 @@ missed = 0
 num_enemies = 3
 enemies_list = []
 for  _ in range(num_enemies):
-    enemies_list.append([randint(0,WIDTH - 50), randint(-100, -40), uniform(0.3, 0.5)])
+    enemies_list.append([randint(0,WIDTH - 50), randint(-100, -40), uniform(0.3, 0.5), choice(enemy_image)])
 player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
+
+font = pygame.font.Font(None, 36)
 
 while running:
 
@@ -55,6 +57,10 @@ while running:
     if keys[pygame.K_d]:
         player_pos.x += 300 * dt
 
+    score_text = font.render(f"Знищено {score}/10", True,(255, 255, 255))
+    missed_text = font.render(f"Пропущено {missed}/3", True, (255, 255, 255))
+    screen.blit(score_text, (10, 10))
+    screen.blit(missed_text, (10, 40))
 
     for enemy in enemies_list:
         enemy[1] += enemy[2]
@@ -63,6 +69,7 @@ while running:
             enemy[0] = randint(0,WIDTH - 50)
             enemy[1] = randint(-100, -40)
             enemy[2] = uniform(0.3, 0.5)
+            enemy[3] = choice(enemy_image)
     new_bullet = []
     for bull in bullet_list:
         bull[1] -= bullet_speed
@@ -70,8 +77,23 @@ while running:
             new_bullet.append(bull)
     bullet_list = new_bullet
 
+    for bull in bullet_list:
+        for enemy in enemies_list:
+            if enemy [0] < bull[0] < enemy[0] + 50 and enemy[1] < bull[1] < enemy[1] + 50:
+                score += 1
+                enemies_list.remove(enemy)
+                bullet_list.remove(bull)
+                enemies_list.append([randint(0,WIDTH - 50), randint(-100, -40), uniform(0.3, 0.5), choice(enemy_image)]  )
+
+    if score >= 10:
+        print("Перемога")
+        running = False
+    if missed >= 3:
+        print("Пропущено занадто багато ворогів")
+        running = False
+
     for enemy in enemies_list:
-        screen.blit(enemy_image, (enemy[0],enemy [1]))
+        screen.blit(enemy[3], (enemy[0],enemy [1]))
         for bull in bullet_list:
             screen.blit(bullet, (bull[0], bull[1]))
     # flip() the display to put your work on screen
