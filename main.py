@@ -1,6 +1,6 @@
 import pygame
 from random import uniform, randint, choice
-
+from time import sleep
 from pygame.examples.moveit import WIDTH, HEIGHT
 
 pygame.init()
@@ -77,6 +77,15 @@ while running:
             new_bullet.append(bull)
     bullet_list = new_bullet
 
+    for enemy in enemies_list:
+        if player_pos.x < enemy[0] + 50 and player_pos.x + 50 >enemy[0] and player_pos.y < enemy[1] and player_pos.y + 50 > enemy[1]:
+            print("Зіткнення з ворогом")
+            end_game_text = font.render("Зіткнення з ворогом", True, (255, 255, 255))
+            screen.blit(end_game_text, (300, 300))
+            pygame.display.update()
+            sleep(5)
+            running = False
+
     for bull in bullet_list:
         for enemy in enemies_list:
             if enemy [0] < bull[0] < enemy[0] + 50 and enemy[1] < bull[1] < enemy[1] + 50:
@@ -86,9 +95,17 @@ while running:
                 enemies_list.append([randint(0,WIDTH - 50), randint(-100, -40), uniform(0.3, 0.5), choice(enemy_image)]  )
 
     if score >= 10:
-        print("Перемога")
+        finish_text = font.render("Єто пабєда", True ,(255, 255, 255))
+        screen.blit(finish_text, (200, 300))
+        pygame.display.update()
+        sleep(5)
+        print("Win")
         running = False
     if missed >= 3:
+        TheEnd_Text = font.render("Ти здох", True, (255, 255, 255))
+        screen.blit(TheEnd_Text, (350,300))
+        pygame.display.update()
+        sleep(5)
         print("Пропущено занадто багато ворогів")
         running = False
 
